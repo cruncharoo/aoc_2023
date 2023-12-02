@@ -109,13 +109,18 @@ const real_data_3 = [
   "Game 100: 1 blue, 1 red, 1 green; 8 blue, 1 green; 1 green, 7 blue, 1 red; 1 green, 4 blue, 1 red; 1 green, 3 blue",
 ];
 
+type RoundObject = { [key in "green" | "blue" | "red"]: number };
+
 function game_formatter(game: string) {
   const colon = game.indexOf(":");
   let game_data = game.slice(colon + 2);
+
   let rounds: Array<string> = [];
-  let round;
+  let round: string;
+
   while (game_data) {
     let semi_colon = game_data.indexOf(";");
+
     if (semi_colon != -1) {
       round = game_data.slice(0, semi_colon);
       rounds.push(round);
@@ -125,39 +130,45 @@ function game_formatter(game: string) {
       game_data = "";
     }
   }
-  let round_objects: Array<{ [key: string]: number }> = [];
+
+  let round_objects: Array<RoundObject> = [];
+
   rounds.forEach((round) => {
-    let round_object: { [key: string]: number } = {};
+    let round_object: RoundObject = { green: 0, blue: 0, red: 0 };
     while (round.indexOf(",") != -1) {
       let dice = round.slice(0, round.indexOf(","));
       let number = parseInt(dice.slice(0, dice.indexOf(" ")));
       let color = dice.slice(dice.indexOf(" ") + 1);
-      round_object[color] = number;
-      round = round.slice(round.indexOf(",") + 2);
+      if (color == "red" || color == "blue" || color == "green") {
+        round_object[color] = number;
+        round = round.slice(round.indexOf(",") + 2);
+      }
     }
     if (round.length > 0) {
       let dice = round;
       let number = parseInt(dice.slice(0, dice.indexOf(" ")));
       let color = dice.slice(dice.indexOf(" ") + 1);
-      round_object[color] = number;
+      if (color == "red" || color == "blue" || color == "green") {
+        round_object[color] = number;
+      }
     }
     round_objects.push(round_object);
   });
   return round_objects;
 }
 
-function max_color_per_game(games: Array<{ [key: string]: number }>) {
+function max_color_per_game(games: Array<RoundObject>) {
   let max_blue = 0;
   let max_red = 0;
   let max_green = 0;
   games.forEach((game) => {
-    if (game.blue > max_blue) {
+    if (game.blue !== undefined && game.blue > max_blue) {
       max_blue = game.blue;
     }
-    if (game.red > max_red) {
+    if (game.red !== undefined && game.red > max_red) {
       max_red = game.red;
     }
-    if (game.green > max_green) {
+    if (game.green !== undefined && game.green > max_green) {
       max_green = game.green;
     }
   });
@@ -186,8 +197,6 @@ function day_one_solve(
   return games_total;
 }
 
-console.log(day_one_solve(real_data_3, 14, 12, 13));
-
 function day_two_solve(data: Array<string>) {
   let acc = 0;
 
@@ -202,4 +211,5 @@ function day_two_solve(data: Array<string>) {
   return acc;
 }
 
+console.log(day_one_solve(real_data_3, 14, 12, 13));
 console.log(day_two_solve(real_data_3));
